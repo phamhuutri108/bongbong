@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Graduation Invitation</title>
+    <style>
+        @font-face {
+            font-family: 'AirbnbScript';
+            src: url('assets/fonts/Airbnb-Plus-Script-App-Regular.ttf') format('truetype');
+        }
+
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #0a1f0f; }
+        #container { position: relative; width: 100vw; height: 100vh; }
+
+        .layer-img {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; opacity: 0; pointer-events: none;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .base-bg { opacity: 1 !important; z-index: 1; }
+        .visible-fade { opacity: 1 !important; pointer-events: auto !important; }
+
+        #user-name-display {
+            position: absolute; z-index: 999;
+            font-family: 'AirbnbScript', Arial, sans-serif;
+            color: #e9eba8; opacity: 0; white-space: nowrap; pointer-events: none;
+            transition: opacity 1.5s ease-in;
+        }
+
+        .cover-img {
+            opacity: 1; cursor: pointer;
+            transition: transform 4s cubic-bezier(0.19, 1, 0.22, 1), opacity 3s ease-out;
+            pointer-events: auto;
+        }
+
+        /* Slide directions – desktop */
+        .slide-1 { transform: translate(-120%, -120%); opacity: 0 !important; }
+        .slide-2 { transform: translate(120%,  120%); opacity: 0 !important; }
+        .slide-3 { transform: translate(-120%,  120%); opacity: 0 !important; }
+        .slide-4 { transform: translate(120%, -120%); opacity: 0 !important; }
+
+        #tap-instruction {
+            position: absolute; width: 100%; text-align: center;
+            color: #f1f3a0; font-family: sans-serif;
+            font-weight: 800; letter-spacing: 3px; z-index: 600;
+            opacity: 0; transition: opacity 0.5s; pointer-events: none;
+            text-shadow: 2px 2px 6px rgba(0,0,0,0.9);
+        }
+
+        @keyframes blink-logic { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+        .blink-active {
+            animation: blink-logic 1.2s infinite ease-in-out !important;
+            pointer-events: auto !important;
+            cursor: pointer !important;
+            opacity: 1 !important;
+        }
+
+        .final-visible {
+            opacity: 1 !important;
+            transition: opacity 1.5s ease-in-out !important;
+        }
+
+        /* Màn hình nhập tên */
+        #name-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0a1f0f; z-index: 2000;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            color: #e9eba8; font-family: sans-serif; transition: opacity 0.8s;
+        }
+        #name-input {
+            padding: 15px; font-size: 1.1rem; margin-bottom: 20px;
+            border-radius: 10px; border: 1px solid #e9eba8;
+            width: 320px; text-align: center;
+            background: transparent; color: white; outline: none;
+        }
+        #btn-start {
+            padding: 12px 45px; font-size: 1.2rem; cursor: pointer;
+            border-radius: 35px; border: none;
+            background: #e9eba8; color: #0a1f0f; font-weight: bold;
+        }
+
+        /* ── Desktop ── */
+        @media (min-width: 769px) {
+            #user-name-display { top: 71.1%; left: 41.5%; font-size: 3.2rem; }
+            #tap-instruction   { bottom: 50px; font-size: 1.2rem; }
+            .cover-img         { z-index: 500; }
+            #img7              { z-index: 250; }
+            .final-visible     { z-index: 100 !important; }
+        }
+
+        /* ── Mobile ── */
+        @media (max-width: 768px) {
+            #user-name-display {
+                top: 70%; left: 58%;
+                transform: translateX(-50%);
+                font-size: 1.9rem;
+                transition: opacity 0.8s ease-in;
+            }
+            #overlay-title  { font-size: 1.3rem; text-align: center; padding: 0 20px; }
+            #name-input     { width: 80%; }
+            #tap-instruction { bottom: 25px; font-size: 1.1rem; letter-spacing: 2px; transition: opacity 1s; }
+            .cover-img      { z-index: 100; }
+            #img7           { z-index: 200; }
+            .final-visible  { z-index: 500 !important; transition: opacity 2.5s ease-in-out !important; }
+
+            /* Slide directions – mobile (đảo chiều) */
+            .slide-1 { transform: translate(120%,  120%); opacity: 0 !important; }
+            .slide-2 { transform: translate(-120%, -120%); opacity: 0 !important; }
+            .slide-3 { transform: translate(-120%,  120%); opacity: 0 !important; }
+            .slide-4 { transform: translate(120%, -120%); opacity: 0 !important; }
+        }
+    </style>
+</head>
+<body>
+
+<audio id="myAudio" loop><source src="assets/audio/music.mp3" type="audio/mpeg"></audio>
+
+<div id="name-overlay">
+    <h1 id="overlay-title">ACCIDENTALLY, THIS EXISTS</h1>
+    <input type="text" id="name-input" placeholder="Your FULL name">
+    <button id="btn-start" onclick="startInvitation()">less gâu !!!!</button>
+</div>
+
+<div id="container">
+    <div id="tap-instruction">TAP THE IMAGE TO CONTINUE</div>
+
+    <img id="img5"  class="layer-img base-bg">
+    <img id="img6"  class="layer-img" style="z-index:10">
+    <div id="user-name-display"></div>
+    <img id="img61" class="layer-img" style="z-index:20">
+    <img id="img7"  class="layer-img" onclick="handleImg7Click()">
+    <img id="img62" class="layer-img" style="z-index:30">
+    <img id="img8"  class="layer-img" style="z-index:31">
+
+    <img id="c4" class="layer-img cover-img" onclick="dismiss(4)">
+    <img id="c3" class="layer-img cover-img" onclick="dismiss(3)">
+    <img id="c2" class="layer-img cover-img" onclick="dismiss(2)">
+    <img id="c1" class="layer-img cover-img" onclick="dismiss(1)">
+</div>
+
+<script>
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    const dir    = isMobile ? 'assets/images/mobile/' : 'assets/images/desktop/';
+    const sfx    = isMobile ? '-mb'                  : '';
+    const ext    = '.png';
+
+    const imgMap = {
+        img5: 'img5', img6: 'img6', img61: 'img61',
+        img7: 'img7', img62: 'img62', img8: 'img8',
+        c1: 'img1', c2: 'img2', c3: 'img3', c4: 'img4'
+    };
+    Object.entries(imgMap).forEach(([id, base]) => {
+        document.getElementById(id).src = dir + base + sfx + ext;
+    });
+
+    // z-index riêng cho mobile cover imgs
+    if (isMobile) {
+        ['c4','c3','c2','c1'].forEach((id, i) => {
+            document.getElementById(id).style.zIndex = 101 + i;
+        });
+        document.getElementById('name-input').placeholder = 'Your FULL name';
+    }
+
+    let clickCount = 0;
+
+    function startInvitation() {
+        const name = document.getElementById('name-input').value;
+        if (!name.trim()) return alert('Nhập tên nhé!');
+        document.getElementById('myAudio').play().catch(() => {});
+        document.getElementById('user-name-display').innerText = name;
+        const overlay = document.getElementById('name-overlay');
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            document.getElementById('tap-instruction').style.opacity = '1';
+        }, 800);
+    }
+
+    function dismiss(n) {
+        if (n !== clickCount + 1) return;
+        document.getElementById('c' + n).classList.add('slide-' + n);
+        clickCount++;
+        if (clickCount >= 4) {
+            document.getElementById('tap-instruction').style.opacity = '0';
+            setTimeout(revealPhase2, 500);
+        }
+    }
+
+    function revealPhase2() {
+        document.getElementById('img6').classList.add('visible-fade');
+        document.getElementById('img61').classList.add('visible-fade');
+        document.getElementById('user-name-display').style.opacity = '1';
+
+        const delay = isMobile ? 1500 : 3000;
+        setTimeout(() => {
+            document.getElementById('img7').classList.add('blink-active');
+        }, delay);
+    }
+
+    function handleImg7Click() {
+        document.getElementById('img7').style.display  = 'none';
+        document.getElementById('img61').style.display = 'none';
+        setTimeout(() => {
+            document.getElementById('img62').classList.add('final-visible');
+            document.getElementById('img8').classList.add('final-visible');
+        }, isMobile ? 100 : 50);
+    }
+</script>
+</body>
+</html>
