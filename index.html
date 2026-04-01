@@ -2,8 +2,23 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Graduation Invitation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Cha Bong gradatouille</title>
+    <meta name="description" content="Rescue me, it's my grad">
+
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <!-- Open Graph / Facebook / Zalo -->
+    <meta property="og:type"        content="website">
+    <meta property="og:title"       content="Cha Bong gradatouille">
+    <meta property="og:description" content="Rescue me, it's my grad">
+    <meta property="og:image"       content="assets/images/desktop/img5.png">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card"        content="summary_large_image">
+    <meta name="twitter:title"       content="Cha Bong gradatouille">
+    <meta name="twitter:description" content="Rescue me, it's my grad">
+    <meta name="twitter:image"       content="assets/images/desktop/img5.png">
     <style>
         @font-face {
             font-family: 'AirbnbScript';
@@ -11,7 +26,7 @@
         }
 
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #0a1f0f; }
-        #container { position: relative; width: 100vw; height: 100vh; }
+        #container { position: relative; width: 100vw; height: 100dvh; }
 
         .layer-img {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -55,6 +70,18 @@
             pointer-events: auto !important;
             cursor: pointer !important;
             opacity: 1 !important;
+            transition: transform 0.15s ease, filter 0.15s ease !important;
+        }
+
+        /* Chỉ active khi con trỏ/ngón tay nằm trên vùng có logo (class .on-logo gán bằng JS) */
+        #img7.blink-active.on-logo {
+            animation-play-state: paused !important;
+            opacity: 1 !important;
+            transform: scale(1.015) !important;
+            cursor: pointer !important;
+        }
+        #img7.blink-active:not(.on-logo) {
+            cursor: default !important;
         }
 
         .final-visible {
@@ -84,7 +111,7 @@
         /* ── Desktop ── */
         @media (min-width: 769px) {
             #user-name-display { top: 71.1%; left: 41.5%; font-size: 3.2rem; }
-            #tap-instruction   { bottom: 50px; font-size: 1.2rem; }
+            #tap-instruction   { bottom: 80px; font-size: 1.2rem; }
             .cover-img         { z-index: 500; }
             #img7              { z-index: 250; }
             .final-visible     { z-index: 100 !important; }
@@ -100,7 +127,7 @@
             }
             #overlay-title  { font-size: 1.3rem; text-align: center; padding: 0 20px; }
             #name-input     { width: 80%; }
-            #tap-instruction { bottom: 25px; font-size: 1.1rem; letter-spacing: 2px; transition: opacity 1s; }
+            #tap-instruction { bottom: calc(60px + env(safe-area-inset-bottom, 0px)); font-size: 1.1rem; letter-spacing: 2px; transition: opacity 1s; }
             .cover-img      { z-index: 100; }
             #img7           { z-index: 200; }
             .final-visible  { z-index: 500 !important; transition: opacity 2.5s ease-in-out !important; }
@@ -130,7 +157,7 @@
     <img id="img6"  class="layer-img" style="z-index:10">
     <div id="user-name-display"></div>
     <img id="img61" class="layer-img" style="z-index:20">
-    <img id="img7"  class="layer-img" onclick="handleImg7Click()">
+    <img id="img7"  class="layer-img">
     <img id="img62" class="layer-img" style="z-index:30">
     <img id="img8"  class="layer-img" style="z-index:31">
 
@@ -197,6 +224,85 @@
         setTimeout(() => {
             document.getElementById('img7').classList.add('blink-active');
         }, delay);
+    }
+
+    // ── Canvas hit-test cho img7 ──────────────────────────────────────
+    const _hitCanvas = document.createElement('canvas');
+    const _hitCtx    = _hitCanvas.getContext('2d', { willReadFrequently: true });
+    let   _img7Ready = false;
+
+    function _drawImg7() {
+        if (_img7Ready) return;
+        const img = document.getElementById('img7');
+        _hitCanvas.width  = img.naturalWidth;
+        _hitCanvas.height = img.naturalHeight;
+        _hitCtx.drawImage(img, 0, 0);
+        _img7Ready = true;
+    }
+
+    function _isOnLogo(clientX, clientY) {
+        const img  = document.getElementById('img7');
+        _drawImg7();
+        const rect = img.getBoundingClientRect();
+        const px   = Math.floor((clientX - rect.left) * (img.naturalWidth  / rect.width));
+        const py   = Math.floor((clientY - rect.top)  * (img.naturalHeight / rect.height));
+        if (px < 0 || py < 0 || px >= _hitCanvas.width || py >= _hitCanvas.height) return false;
+        return _hitCtx.getImageData(px, py, 1, 1).data[3] > 10;
+    }
+
+    function _setupImg7Events() {
+        const img = document.getElementById('img7');
+
+        // Desktop – mousemove
+        img.addEventListener('mousemove', (e) => {
+            if (!img.classList.contains('blink-active')) return;
+            img.classList.toggle('on-logo', _isOnLogo(e.clientX, e.clientY));
+        });
+        img.addEventListener('mouseleave', () => img.classList.remove('on-logo'));
+
+        // Mobile – touch
+        img.addEventListener('touchstart', (e) => {
+            if (!img.classList.contains('blink-active')) return;
+            const t = e.touches[0];
+            img.classList.toggle('on-logo', _isOnLogo(t.clientX, t.clientY));
+        }, { passive: true });
+        img.addEventListener('touchend', () => img.classList.remove('on-logo'));
+
+        // Click / tap – chỉ kích hoạt khi trên logo
+        img.addEventListener('click', (e) => {
+            if (!img.classList.contains('blink-active')) return;
+            if (_isOnLogo(e.clientX, e.clientY)) handleImg7Click();
+        });
+    }
+
+    // Lấy màu trung bình từ pixel có alpha > 10 của img7
+    function _sampleImg7Color() {
+        _drawImg7();
+        const data = _hitCtx.getImageData(0, 0, _hitCanvas.width, _hitCanvas.height).data;
+        let r = 0, g = 0, b = 0, count = 0;
+        for (let i = 0; i < data.length; i += 4) {
+            if (data[i + 3] > 10) { r += data[i]; g += data[i+1]; b += data[i+2]; count++; }
+        }
+        if (!count) return 'rgba(255,255,255,0.7)';
+        return `rgba(${Math.round(r/count)},${Math.round(g/count)},${Math.round(b/count)},0.75)`;
+    }
+
+    let _img7GlowColor = null;
+
+    document.getElementById('img7').addEventListener('load', () => {
+        _setupImg7Events();
+        _img7GlowColor = _sampleImg7Color();
+        // Gán rule glow động vào style
+        const style = document.createElement('style');
+        style.textContent = `#img7.blink-active.on-logo { filter: brightness(1.2) drop-shadow(0 0 18px ${_img7GlowColor}) !important; }`;
+        document.head.appendChild(style);
+    }, { once: true });
+    if (document.getElementById('img7').complete) {
+        _setupImg7Events();
+        _img7GlowColor = _sampleImg7Color();
+        const style = document.createElement('style');
+        style.textContent = `#img7.blink-active.on-logo { filter: brightness(1.2) drop-shadow(0 0 18px ${_img7GlowColor}) !important; }`;
+        document.head.appendChild(style);
     }
 
     function handleImg7Click() {
