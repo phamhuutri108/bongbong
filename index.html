@@ -8,6 +8,11 @@
 
     <link rel="icon" type="image/png" href="favicon.png">
 
+    <!-- Dancing Script: script font hỗ trợ tiếng Việt -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
+
     <!-- Open Graph / Facebook / Zalo -->
     <meta property="og:type"        content="website">
     <meta property="og:title"       content="Cha Bong gradatouille">
@@ -24,6 +29,7 @@
         @font-face {
             font-family: 'AirbnbScript';
             src: url('assets/fonts/Airbnb-Plus-Script-App-Regular.ttf') format('truetype');
+            unicode-range: U+0000-007F; /* Chỉ dùng cho ký tự Latin cơ bản (không dấu) */
         }
 
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #0a1f0f; }
@@ -46,7 +52,7 @@
 
         #user-name-display {
             position: absolute; z-index: 999;
-            font-family: 'AirbnbScript', Arial, sans-serif;
+            font-family: 'AirbnbScript', 'Dancing Script', cursive;
             color: #e9eba8; opacity: 0; white-space: nowrap; pointer-events: none;
             transition: opacity 1.5s ease-in;
         }
