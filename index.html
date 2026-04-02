@@ -115,6 +115,66 @@
             background: #e9eba8; color: #0a1f0f; font-weight: bold;
         }
 
+        /* ── Email popup modal ── */
+        #email-backdrop {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 31, 15, 0.75);
+            z-index: 3000;
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.6s ease;
+        }
+        #email-backdrop.show {
+            opacity: 1; pointer-events: auto;
+        }
+        #email-card {
+            background: #0a1f0f;
+            border: 1px solid #e9eba8;
+            border-radius: 18px;
+            padding: 36px 32px;
+            width: 360px; max-width: 88vw;
+            display: flex; flex-direction: column; align-items: center;
+            gap: 16px;
+            color: #e9eba8; font-family: sans-serif;
+            transform: translateY(20px);
+            transition: transform 0.6s ease;
+        }
+        #email-backdrop.show #email-card {
+            transform: translateY(0);
+        }
+        #email-card-title {
+            font-size: clamp(0.6rem, 3vw, 1rem); font-weight: 800;
+            letter-spacing: 2px; text-align: center;
+            text-transform: uppercase; white-space: nowrap;
+        }
+        #email-card-body {
+            font-size: 0.88rem; text-align: center;
+            line-height: 1.6; opacity: 0.85;
+        }
+        #email-input {
+            padding: 14px; font-size: 1rem;
+            border-radius: 10px; border: 1px solid #e9eba8;
+            width: 100%; box-sizing: border-box; text-align: center;
+            background: transparent; color: white; outline: none;
+        }
+        #email-input::placeholder { color: rgba(233,235,168,0.45); }
+        #btn-email-submit {
+            padding: 12px 40px; font-size: 1.05rem; cursor: pointer;
+            border-radius: 35px; border: none;
+            background: #e9eba8; color: #0a1f0f; font-weight: bold;
+            transition: opacity 0.2s;
+        }
+        #btn-email-submit:disabled { opacity: 0.5; cursor: default; }
+        #email-status {
+            font-size: 0.82rem; text-align: center;
+            min-height: 18px; opacity: 0.8;
+        }
+        #btn-email-skip {
+            font-size: 0.78rem; opacity: 0.5;
+            background: none; border: none; color: #e9eba8;
+            cursor: pointer; text-decoration: underline;
+        }
+
         /* ── Desktop ── */
         @media (min-width: 769px) {
             #user-name-display { top: 71.1%; left: 41.5%; font-size: 3.2rem; }
@@ -165,6 +225,21 @@
     <h1 id="overlay-title">ACCIDENTALLY, THIS EXISTS</h1>
     <input type="text" id="name-input" placeholder="Your FULL name">
     <button id="btn-start" onclick="startInvitation()">less gâu !!!!</button>
+</div>
+
+<!-- Email reminder popup -->
+<div id="email-backdrop">
+    <div id="email-card">
+        <div id="email-card-title">IN CASE YOU ACCIDENTALLY FORGET</div>
+        <div id="email-card-body">
+            Me will let you know when the day is near,<br>
+            bring a sword and armor, come rescue me here.
+        </div>
+        <input type="email" id="email-input" placeholder="your@email.com">
+        <button id="btn-email-submit" onclick="submitEmail()">See you there!</button>
+        <div id="email-status"></div>
+        <button id="btn-email-skip" onclick="dismissEmailPopup()">No thanks, skip</button>
+    </div>
 </div>
 
 <div id="container">
@@ -329,6 +404,56 @@
             document.getElementById('img62').classList.add('final-visible');
             document.getElementById('img8').classList.add('final-visible');
         }, isMobile ? 100 : 50);
+
+        // Show email popup after ending screen has appeared
+        setTimeout(() => {
+            document.getElementById('email-backdrop').classList.add('show');
+        }, isMobile ? 7500 : 7300);
+    }
+
+    // ── Email popup ──────────────────────────────────────────────────────
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbye0Qew5ZkNxsuRvbFkDUmJEWZDFqI3Rvti6VoCaogUQoL8oYO556SfzKI4CLALRRs/exec';
+
+    function dismissEmailPopup() {
+        const backdrop = document.getElementById('email-backdrop');
+        backdrop.style.transition = 'opacity 0.5s ease';
+        backdrop.style.opacity = '0';
+        setTimeout(() => {
+            backdrop.style.display = 'none';
+        }, 500);
+    }
+
+    async function submitEmail() {
+        const emailInput = document.getElementById('email-input');
+        const btn        = document.getElementById('btn-email-submit');
+        const status     = document.getElementById('email-status');
+        const email      = emailInput.value.trim();
+        const name       = document.getElementById('user-name-display').innerText;
+
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            status.textContent = 'Please enter a valid email address.';
+            return;
+        }
+
+        btn.disabled = true;
+        status.textContent = 'Sending…';
+
+        try {
+            await fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email })
+            });
+            status.textContent = "You're on the list! Check your inbox on April 12 🌿";
+            btn.style.display = 'none';
+            document.getElementById('btn-email-skip').style.display = 'none';
+            emailInput.style.display = 'none';
+            setTimeout(dismissEmailPopup, 2800);
+        } catch (err) {
+            btn.disabled = false;
+            status.textContent = 'Something went wrong. Please try again.';
+        }
     }
 </script>
 </body>
