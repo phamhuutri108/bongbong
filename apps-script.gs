@@ -16,6 +16,7 @@ const EVENT_DESCRIPTION =
   "Time: 13/4/2026 - 7am (crazy, me know)\\n" +
   "Location: RMIT SGS campus - sport hall";
 
+const ORGANIZER_EMAIL = 'nganhanh777@gmail.com';
 const SENDER_NAME   = 'Cha Bong Gradatouille';
 const EMAIL_SUBJECT = "Cha Bong gradatouille reminder";
 
@@ -75,6 +76,7 @@ function createICS() {
     'BEGIN:VEVENT',
     `UID:${uid}`,
     `DTSTAMP:${now}`,
+    `ORGANIZER;CN=${SENDER_NAME}:mailto:${ORGANIZER_EMAIL}`,
     `DTSTART;TZID=Asia/Ho_Chi_Minh:${EVENT_START}`,
     `DTEND;TZID=Asia/Ho_Chi_Minh:${EVENT_END}`,
     `SUMMARY:${EVENT_TITLE}`,
@@ -110,34 +112,7 @@ function sendReminders() {
     if (!email || alreadySent) return;
 
     try {
-      const firstName = name.split(' ').pop() || 'friend';
-
-      const htmlBody = `
-        <html><head><meta charset="UTF-8"></head><body>
-        <div style="font-family: sans-serif; max-width: 520px; margin: auto; color: #1a1a1a;">
-
-          <div style="padding: 28px 20px 8px; line-height: 1.8;">
-            <p>Hi <strong>${firstName}</strong>,</p>
-            <p>
-              <strong>Cha Bong gradatouille</strong> is tomorrow!
-            </p>
-            <p>
-              <strong>Time:</strong> 13/4/2026 - 7am (crazy, me know)<br>
-              <strong>Location:</strong> RMIT SGS campus - sport hall
-            </p>
-          </div>
-
-          <img src="https://chabonggradatouille.vercel.app/assets/images/email-img.jpeg"
-               alt="Cha Bong Gradatouille"
-               width="100%"
-               style="display:block; width:100%; border-radius: 0 0 12px 12px; margin-top: 8px;">
-
-        </div>
-        </body></html>
-      `;
-
       GmailApp.sendEmail(email, EMAIL_SUBJECT, '', {
-        htmlBody,
         name: SENDER_NAME,
         attachments: [icsBlob.copyBlob()]
       });
